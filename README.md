@@ -27,3 +27,5 @@ Hierarchical clustuering of any files. Pure go.
   * simplify cluster structure for memoruy efficiency ( single slice contains all object ids, cluster is a sub-slice of the table)
   * produce dentogram, with intercluster distance display ? 
   * allocate a new, unknown file to the closest cluster ?
+
+See  https://en.wikipedia.org/wiki/Hierarchical_clustering  for commonly used linkage criteria between two sets of observations A and B and a distance d 
