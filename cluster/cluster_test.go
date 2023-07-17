@@ -36,19 +36,19 @@ func TestStringCluster(t *testing.T) {
 	fmt.Println("Computing clusters - single linkage")
 	cc = NewCContexMatrix(context.Background(), mat, SingleLinkage)
 	k = cc.MergeAll()
-	fmt.Println(k.Tree())
+	fmt.Println(k.Dentogram())
 	displayMedoids(cc)
 
 	fmt.Println("Computing clusters - complete linkage")
 	cc = NewCContexMatrix(context.Background(), mat, CompleteLinkage)
 	k = cc.MergeAll()
-	fmt.Println(k.Tree())
+	fmt.Println(k.Dentogram())
 	displayMedoids(cc)
 
 	fmt.Println("Computing clusters - UPGMA linkage")
 	cc = NewCContexMatrix(context.Background(), mat, UPGMALinkage)
 	k = cc.MergeAll()
-	fmt.Println(k.Tree())
+	fmt.Println(k.Dentogram())
 	displayMedoids(cc)
 
 }

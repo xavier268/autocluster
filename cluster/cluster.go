@@ -125,10 +125,10 @@ func (cc *CContext) Dump() {
 	}
 }
 
-// Tree representation of a group of clusters
-func (c *Cluster) Tree() string {
+// Dentogram representation of a group of clusters
+func (c *Cluster) Dentogram() string {
 	sb := new(strings.Builder)
-	c.tree(sb, "->", false)
+	c.tree(sb, "->", false) // do not skip single nodes
 	return sb.String()
 }
 
