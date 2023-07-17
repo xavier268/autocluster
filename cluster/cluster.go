@@ -1,6 +1,10 @@
 package cluster
 
-import "context"
+import (
+	"context"
+
+	"github.com/xavier268/autocluster/distance"
+)
 
 type Cluster struct {
 	obj   []int    // list of objects (0 based)
@@ -12,17 +16,32 @@ type Cluster struct {
 // Cluster context
 type CContext struct {
 	ctx context.Context
-	cls map[*Cluster]bool // Set of free clusters, ie can be merged
+	cls map[*Cluster]bool // Set of free clusters, ie clusters that can be merged further
+	ld  LinkDist          // Link distance to use
 }
 
-func NewCContext(ctx context.Context) *CContext {
+func NewEmptyCContext(ctx context.Context) *CContext {
 	return &CContext{
 		ctx: ctx,
+		cls: make(map[*Cluster]bool),
+		ld:  nil,
 	}
 }
 
-// Create a new single object cluster
-func (cc *CContext) NewClusterObject(obj int) {
+// Defines how to converts the element distance into a linkage distance.
+type LinkOption func(Dist) LinkDist
+
+func NewCContexMatrix(ctx context.Context, mat *distance.Matrix, linkOption LinkOption) *CContext {
+	cc := NewEmptyCContext(ctx)
+	cc.ld = linkOption(mat.Dist)
+	for i := 0; i < mat.Size(); i++ {
+		cc.AddObject(i)
+	}
+	return cc
+}
+
+// Add a new single object cluster
+func (cc *CContext) AddObject(obj int) {
 	c := &Cluster{
 		obj: []int{obj},
 	}
@@ -43,7 +62,7 @@ func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
 }
 
 // Make a single merge step. Return true when finished (only 1 cluster left)
-func (cc *CContext) Merge(ld LinkDist) (finished bool) {
+func (cc *CContext) Merge() (finished bool) {
 
 	var free []*Cluster // collect free clusters that could be merged
 	for k, v := range cc.cls {
@@ -59,7 +78,7 @@ func (cc *CContext) Merge(ld LinkDist) (finished bool) {
 	// Only compare 0 <= i < j < len(free)
 	for i := 0; i < len(free)-1; i++ {
 		for j := i + 1; j < len(free); j++ {
-			d := ld(free[i], free[j])
+			d := cc.ld(free[i], free[j])
 			if c1 == nil || d < dmin {
 				c1, c2 = free[i], free[j]
 				dmin = d
