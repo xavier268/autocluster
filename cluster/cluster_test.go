@@ -25,16 +25,39 @@ func TestStringDistance(t *testing.T) {
 
 func TestStringCluster(t *testing.T) {
 
+	var cc *CContext
+	var k *Cluster
+
 	// Prepare test matrix
 	displayData()
 	mat := distance.ComputeString(data)
 	fmt.Println(mat)
 
-	fmt.Println("Computing clusters")
-	cc := NewCContexMatrix(context.Background(), mat, SingleLinkage)
+	fmt.Println("Computing clusters - single linkage")
+	cc = NewCContexMatrix(context.Background(), mat, SingleLinkage)
+	k = cc.MergeAll()
+	fmt.Println(k.Tree())
+	displayMedoids(cc)
 
-	cc.Merge()
+	fmt.Println("Computing clusters - complete linkage")
+	cc = NewCContexMatrix(context.Background(), mat, CompleteLinkage)
+	k = cc.MergeAll()
+	fmt.Println(k.Tree())
+	displayMedoids(cc)
 
+	fmt.Println("Computing clusters - UPGMA linkage")
+	cc = NewCContexMatrix(context.Background(), mat, UPGMALinkage)
+	k = cc.MergeAll()
+	fmt.Println(k.Tree())
+	displayMedoids(cc)
+
+}
+
+func displayMedoids(cc *CContext) {
+	for k := range cc.cls {
+		m, d := cc.Medoid(k)
+		fmt.Printf("Object %d (avg dist %2.6f) is medoïd for cluster %v (link dist %2.6f)  \n", m, d, k.obj, k.linkd)
+	}
 }
 
 func displayData() {

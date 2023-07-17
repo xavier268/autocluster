@@ -71,5 +71,6 @@ func (m *Matrix) String() string {
 			fmt.Fprintf(sb, "%02.6f\t", m.Dist(i, j))
 		}
 	}
+	fmt.Fprintln(sb)
 	return sb.String()
 }

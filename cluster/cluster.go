@@ -2,6 +2,9 @@ package cluster
 
 import (
 	"context"
+	"fmt"
+	"math"
+	"strings"
 
 	"github.com/xavier268/autocluster/distance"
 )
@@ -18,6 +21,7 @@ type CContext struct {
 	ctx context.Context
 	cls map[*Cluster]bool // Set of free clusters, ie clusters that can be merged further
 	ld  LinkDist          // Link distance to use
+	ed  Dist              // Element distance
 }
 
 func NewEmptyCContext(ctx context.Context) *CContext {
@@ -25,6 +29,7 @@ func NewEmptyCContext(ctx context.Context) *CContext {
 		ctx: ctx,
 		cls: make(map[*Cluster]bool),
 		ld:  nil,
+		ed:  nil,
 	}
 }
 
@@ -34,6 +39,7 @@ type LinkOption func(Dist) LinkDist
 func NewCContexMatrix(ctx context.Context, mat *distance.Matrix, linkOption LinkOption) *CContext {
 	cc := NewEmptyCContext(ctx)
 	cc.ld = linkOption(mat.Dist)
+	cc.ed = mat.Dist
 	for i := 0; i < mat.Size(); i++ {
 		cc.AddObject(i)
 	}
@@ -61,6 +67,22 @@ func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
 	cc.cls[c] = true
 }
 
+// Merge until there is only 1 cluster left.
+// Return tjhis main cluster.
+func (cc *CContext) MergeAll() *Cluster {
+	for !cc.Merge() {
+	}
+
+	for k, v := range cc.cls {
+		if v {
+			return k
+		}
+	}
+
+	panic("internal error - there should always be at least 1 free cluster in the context when merging")
+
+}
+
 // Make a single merge step. Return true when finished (only 1 cluster left)
 func (cc *CContext) Merge() (finished bool) {
 
@@ -73,7 +95,7 @@ func (cc *CContext) Merge() (finished bool) {
 	if len(free) <= 1 {
 		return true
 	}
-	var dmin float64 = MAXDISTANCE
+	var dmin float64 = math.Inf(+1)
 	var c1, c2 *Cluster = nil, nil
 	// Only compare 0 <= i < j < len(free)
 	for i := 0; i < len(free)-1; i++ {
@@ -90,4 +112,34 @@ func (cc *CContext) Merge() (finished bool) {
 	}
 	cc.merge(c1, c2, dmin)
 	return false
+}
+
+// String representation of a single cluster, for debugging.
+func (c *Cluster) String() string {
+	return fmt.Sprintf("%p\t%v\t%p , %p\t d=%2.6f", c, c.obj, c.left, c.right, c.linkd)
+}
+
+func (cc *CContext) Dump() {
+	for k, v := range cc.cls {
+		fmt.Printf("%v:%p\t%s\n", v, k, k)
+	}
+}
+
+// Tree representation of a group of clusters
+func (c *Cluster) Tree() string {
+	sb := new(strings.Builder)
+	c.tree(sb, "->", false)
+	return sb.String()
+}
+
+func (c *Cluster) tree(sb *strings.Builder, prefix string, skipSingle bool) {
+	if skipSingle && len(c.obj) <= 1 {
+		return // skip single nodes ...
+	}
+	const inc = "\t"
+	fmt.Fprintf(sb, "%2.6f\t%s%v\n", c.linkd, prefix, c.obj)
+	if c.left != nil {
+		c.left.tree(sb, inc+prefix, skipSingle)
+		c.right.tree(sb, inc+prefix, skipSingle)
+	}
 }
