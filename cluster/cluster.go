@@ -148,25 +148,27 @@ func (c *Cluster) tree(sb *strings.Builder, prefix string, skipSingle bool) {
 	}
 }
 
-func (c *Cluster) Dendrogram(names []string) string {
+func (c *Cluster) Dendrogram(names []string, minsize int) string {
 	if c == nil {
 		return ""
 	}
 	sb := new(strings.Builder)
-	c.dendrogram(sb, "", names, true, true)
+	c.dendrogram(sb, "", names, true, minsize, true)
 	return sb.String()
 }
 
-func (c *Cluster) dendrogram(sb *strings.Builder, prefix string, names []string, isTail bool, truncate bool) {
+func (c *Cluster) dendrogram(sb *strings.Builder, prefix string, names []string, isTail bool, minsize int, truncate bool) {
 	if c == nil {
 		return
 	}
 	if len(c.obj) == 0 {
 		panic("internal error - dentogram with empty cluster")
 	}
-	if len(c.obj) == 1 {
-		pp := fmt.Sprintf("%s+---[%d]%s", prefix, c.obj[0], strings.Repeat(" - ", 80))
-		fmt.Fprintf(sb, "%s  %s\n", pp[:100], names[c.obj[0]])
+	if len(c.obj) == 1 || len(c.obj) < minsize {
+		for _, obj := range c.obj {
+			pp := fmt.Sprintf("%s+---[%d]%s", prefix, obj, strings.Repeat(" - ", 80))
+			fmt.Fprintf(sb, "%s  %s\n", pp[:100], names[obj])
+		}
 		return
 	}
 	if truncate && len(c.obj) > 30 {
@@ -180,8 +182,8 @@ func (c *Cluster) dendrogram(sb *strings.Builder, prefix string, names []string,
 		prefix += "|  "
 	}
 	//fmt.Fprintln(sb, prefix)
-	c.left.dendrogram(sb, prefix, names, false, truncate)
-	c.right.dendrogram(sb, prefix, names, true, truncate)
+	c.left.dendrogram(sb, prefix, names, false, minsize, truncate)
+	c.right.dendrogram(sb, prefix, names, true, minsize, truncate)
 	fmt.Fprintln(sb, prefix)
 }
 
