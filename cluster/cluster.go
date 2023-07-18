@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"os"
 	"strings"
 
 	"github.com/xavier268/autocluster/distance"
@@ -68,19 +69,22 @@ func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
 }
 
 // Merge until there is only 1 cluster left.
-// Return tjhis main cluster.
-func (cc *CContext) MergeAll() *Cluster {
+func (cc *CContext) MergeAll() {
+	fmt.Fprint(os.Stderr, "\nComputing clusters")
 	for !cc.Merge() {
+		fmt.Fprintf(os.Stderr, ".")
 	}
+	fmt.Println()
+}
 
+// Get the root cluster
+func (cc *CContext) Root() *Cluster {
 	for k, v := range cc.cls {
 		if v {
 			return k
 		}
 	}
-
-	panic("internal error - there should always be at least 1 free cluster in the context when merging")
-
+	return nil
 }
 
 // Make a single merge step. Return true when finished (only 1 cluster left)
@@ -125,8 +129,8 @@ func (cc *CContext) Dump() {
 	}
 }
 
-// Dentogram representation of a group of clusters
-func (c *Cluster) Dentogram() string {
+// Tree representation of a group of clusters
+func (c *Cluster) Tree() string {
 	sb := new(strings.Builder)
 	c.tree(sb, "->", false) // do not skip single nodes
 	return sb.String()
@@ -143,3 +147,51 @@ func (c *Cluster) tree(sb *strings.Builder, prefix string, skipSingle bool) {
 		c.right.tree(sb, inc+prefix, skipSingle)
 	}
 }
+
+func (c *Cluster) Dendrogram(names []string) string {
+	if c == nil {
+		return ""
+	}
+	sb := new(strings.Builder)
+	c.dendrogram(sb, "", names, true, true)
+	return sb.String()
+}
+
+func (c *Cluster) dendrogram(sb *strings.Builder, prefix string, names []string, isTail bool, truncate bool) {
+	if c == nil {
+		return
+	}
+	if len(c.obj) == 0 {
+		panic("internal error - dentogram with empty cluster")
+	}
+	if len(c.obj) == 1 {
+		pp := fmt.Sprintf("%s+---[%d]%s", prefix, c.obj[0], strings.Repeat(" - ", 80))
+		fmt.Fprintf(sb, "%s  %s\n", pp[:100], names[c.obj[0]])
+		return
+	}
+	if truncate && len(c.obj) > 30 {
+		fmt.Fprintf(sb, "%s+---%v[...]\t(link dist : %2.6f)\n", prefix, c.obj[:28], c.linkd)
+	} else {
+		fmt.Fprintf(sb, "%s+---%v\t(link dist : %2.6f)\n", prefix, c.obj, c.linkd)
+	}
+	if isTail {
+		prefix += "   "
+	} else {
+		prefix += "|  "
+	}
+	//fmt.Fprintln(sb, prefix)
+	c.left.dendrogram(sb, prefix, names, false, truncate)
+	c.right.dendrogram(sb, prefix, names, true, truncate)
+	fmt.Fprintln(sb, prefix)
+}
+
+func isIn(v int, sl []int) bool {
+	for _, s := range sl {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+var _ = isIn

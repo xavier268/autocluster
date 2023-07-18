@@ -6,6 +6,7 @@ import (
 	"compress/gzip"
 	"compress/zlib"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -47,11 +48,13 @@ func ComputeFolder(folder string) *Matrix {
 
 // Compute the distance matrix for a group of files
 func ComputeFiles(fnames ...string) *Matrix {
+	fmt.Fprint(os.Stderr, "\nComputing distance matrix")
 	mat := new(Matrix)
 	for i := 0; i < len(fnames); i++ {
 		for j := i + 1; j < len(fnames); j++ {
 			mat.Set(i, j, DistString(fnames[i], fnames[j]))
 		}
+		fmt.Fprint(os.Stderr, ".")
 	}
 	return mat
 }
