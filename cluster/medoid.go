@@ -1,6 +1,11 @@
 package cluster
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
+
+var FLAGMEDOID bool // to compute or not the medoids
 
 // Find the Medoïd and the average distance from the cluster elements to the medoid (including the medoid itself).
 func (cc *CContext) Medoid(c *Cluster) (med int, dist float64) {
@@ -31,4 +36,23 @@ func (c *Cluster) sumDistFrom(x int, ed Dist) float64 {
 		d += ed(x, e)
 	}
 	return d
+}
+
+func (cc *CContext) DumpMedoids() {
+
+	fmt.Println("\nList of medoids and average internal distance per cluster :")
+	for k, v := range cc.cls {
+		if len(k.obj) == 1 {
+			// do not dump single clusters
+			continue
+		}
+		if v {
+			fmt.Print("root\t")
+		} else {
+			fmt.Print("    \t")
+		}
+		fmt.Printf("[%d]\t%2.6f \t --medoïd for--> \t%v \n", cc.medoids[k].m, cc.medoids[k].d, k.obj)
+	}
+	fmt.Println()
+
 }

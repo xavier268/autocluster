@@ -19,10 +19,14 @@ type Cluster struct {
 
 // Cluster context
 type CContext struct {
-	ctx context.Context
-	cls map[*Cluster]bool // Set of free clusters, ie clusters that can be merged further
-	ld  LinkDist          // Link distance to use
-	ed  Dist              // Element distance
+	ctx     context.Context
+	cls     map[*Cluster]bool     // Set of free clusters, ie clusters that can be merged further
+	ld      LinkDist              // Link distance to use
+	ed      Dist                  // Element distance
+	medoids map[*Cluster]struct { // medoid and distance - may stay unitiallized
+		m int
+		d float64
+	}
 }
 
 func NewEmptyCContext(ctx context.Context) *CContext {
@@ -41,6 +45,10 @@ func NewCContexMatrix(ctx context.Context, mat *distance.Matrix, linkOption Link
 	cc := NewEmptyCContext(ctx)
 	cc.ld = linkOption(mat.Dist)
 	cc.ed = mat.Dist
+	cc.medoids = make(map[*Cluster]struct {
+		m int
+		d float64
+	})
 	for i := 0; i < mat.Size(); i++ {
 		cc.AddObject(i)
 	}
@@ -53,6 +61,10 @@ func (cc *CContext) AddObject(obj int) {
 		obj: []int{obj},
 	}
 	cc.cls[c] = true
+	cc.medoids[c] = struct {
+		m int
+		d float64
+	}{obj, 0.}
 }
 
 // Merge 2 clusters. Old clusters become inactive, new cluster is now active.
@@ -66,6 +78,13 @@ func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
 	cc.cls[c1] = false
 	cc.cls[c2] = false
 	cc.cls[c] = true
+	if FLAGMEDOID {
+		m, d := cc.Medoid(c)
+		cc.medoids[c] = struct {
+			m int
+			d float64
+		}{m, d}
+	}
 }
 
 // Merge until there is only 1 cluster left.
