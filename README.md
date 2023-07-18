@@ -229,7 +229,7 @@ root    8       [10]    0.837872         --medoïd for-->        [0 12 9 3 4 8 5
 
 By default, you get **a lot** of useful information.
 
-First, you  get a list of the files, 23 here, which the program is going to process. Nothing fancy at this point, except that git files are excluded ;-). You also notice that a unique id is associated with each file, and will be used later to save screen space.
+First, you  get a list of the files, 24 here, which the program is going to process. Nothing fancy at this point, except that git files are excluded ;-). You also notice that a unique id is associated with each file, and will be used later to save screen space.
 
 Then, a message about a cache appears? The caching process is entirely transparent, in the temporary forlder of your computer. It significantly accelerates processing of files when you run the program later. It takes care of itself if the name or content of your file is modified, don't worry ... The size of the cache is minimal, since a digest of the file content is used to uniquely identify known content.
 
@@ -238,7 +238,7 @@ From there, we can compute a distance matrix (here, a 23 x 23 matrix) for all th
 Then, the hierarchical grouping (the **clusters**) that program selected are shown. This representation is a *dendrogramme*, showing the root cluster (the one that contains all the files) and then spliting until there are only single file clusters.
 Notice how the cluster content is descripbed by an array of *id* of files. You also see the *level* and *link distance*. The *level* starts at 0 for the leaf, and increases as we move towards the root cluster. Here, the root cluster is level 8. The *link distance* represents the cost we had to accept (and minimize) we creating this cluster by merging two smaller clusters. The smaller the *link distance*, the closer the left and right components of the cluster were from each other.
 
-Finally, we get a table of the **medoïds** for each cluster. The * medoïd* is the file that represents the best the cluster, being the closest within the cluster to all the other. You get the *level* (as above), the *id* of the *medoïd*, the average distance from the *medoïd* to the other elements of the cluster, and a reminder of the cluster content. Obviously, the *medoid* always appears in that cluster content list !
+Finally, we get a table of the **medoïds** for each cluster. The * medoïd* is the file that represents the best the cluster, being the closest within the cluster to all the other. You get the *level* (as above), the *id* of the *medoïd*, the average distance from the *medoïd* to the other elements of the cluster, and a reminder of the cluster content. Obviously, the *medoid* always appears in that cluster content list. Do you see how the file 21 is the *medoïd* of [ 20,21,22,23] with a very small average distance to the rest of the files 20 to 24 ? These are the test files (see below).
 
 A lot of CLI settings are available, you can get them with :
 
@@ -283,7 +283,7 @@ We need to define distance between *clusters*, called a *linkage distance*. Ther
 
 And that's it ! We can now navigate our data, look for natural grouping of our files, without actually having to review the whole stuff ...
 
-And because all coputations are cached, it may take some time the first time, but will be much faster we you do it again.
+And because all computations are cached, it may take some time the first time, but will be much faster we you do it again.
 
 ## Some more details and potential improvements 
 
