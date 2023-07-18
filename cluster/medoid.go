@@ -40,16 +40,16 @@ func (c *Cluster) sumDistFrom(x int, ed Dist) float64 {
 
 func (cc *CContext) DumpMedoids() {
 
-	fmt.Println("\nList of medoids and average internal distance per cluster :")
+	fmt.Println("\nList of medoids and average internal distance per cluster :\n\n\tlevel\tmedoïd\tmedoïd dist\t\t\t\tcluster")
 	for k, v := range cc.cls {
 		if len(k.obj) == 1 {
 			// do not dump single clusters
 			continue
 		}
 		if v {
-			fmt.Print("root\t")
+			fmt.Printf("root%5d\t", k.level)
 		} else {
-			fmt.Print("    \t")
+			fmt.Printf("    %5d\t", k.level)
 		}
 		fmt.Printf("[%d]\t%2.6f \t --medoïd for--> \t%v \n", cc.medoids[k].m, cc.medoids[k].d, k.obj)
 	}

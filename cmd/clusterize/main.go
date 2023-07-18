@@ -31,7 +31,7 @@ func main() {
 	flag.StringVar(&distance.CACHEFILENAME, "cache", filepath.Join(os.TempDir(), "fileDistance.cache"), "cache file location")
 	flag.BoolVar(&FLAGHELP, "h", false, "print version, usage and exit")
 	flag.BoolVar(&FLAGDEND, "d", true, "print dendrogramme")
-	flag.BoolVar(&FLAGTREE, "t", false, "print tree")
+	flag.BoolVar(&FLAGTREE, "t", true, "print tree")
 	flag.BoolVar(&FLAGNAMES, "f", true, "list file names")
 	flag.BoolVar(&FLAGMATRIX, "dm", true, "print distance matrix (truncated)")
 	flag.BoolVar(&cluster.FLAGMEDOID, "med", true, "compute and print medoids (dendrogramme)")
@@ -50,7 +50,7 @@ func main() {
 		files = append(files, distance.FilesInFolder(f)...)
 	}
 	if FLAGNAMES {
-		fmt.Println("Processing files :")
+		fmt.Println("\nList of files to process :\n\n  id\tfull path name")
 		for i, f := range files {
 			fmt.Printf("%4d\t%s\n", i, f)
 		}

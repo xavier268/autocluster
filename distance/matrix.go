@@ -62,6 +62,8 @@ func (m *Matrix) String() string {
 		return "<empty matrix>"
 	}
 	sb := new(strings.Builder)
+
+	fmt.Fprintln(sb, "Distance matrix (truncated after 10 values) :")
 	for j := 0; j < m.size; j++ {
 		if j == 11 {
 			fmt.Fprintf(sb, "\t[...%d]", m.size-1)

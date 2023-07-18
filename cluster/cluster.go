@@ -15,6 +15,7 @@ type Cluster struct {
 	left  *Cluster // tree of hierarchical clusters
 	right *Cluster // tree of hierarchical clusters
 	linkd float64  // distance between left and right sub clusters
+	level int      // from the leaf = 0
 }
 
 // Cluster context
@@ -74,6 +75,11 @@ func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
 		left:  c1,
 		right: c2,
 		linkd: d,
+	}
+	if c1.level > c2.level {
+		c.level = c1.level + 1
+	} else {
+		c.level = c2.level + 1
 	}
 	cc.cls[c1] = false
 	cc.cls[c2] = false
@@ -152,7 +158,8 @@ func (cc *CContext) Dump() {
 // Tree representation of a group of clusters
 func (c *Cluster) Tree() string {
 	sb := new(strings.Builder)
-	c.tree(sb, "->", false) // do not skip single nodes
+	fmt.Fprintln(sb, "Table of all clusters :\n\nlink dist.\tlevel\tcluster content .....................")
+	c.tree(sb, "", false) // do not skip single nodes
 	return sb.String()
 }
 
@@ -161,7 +168,7 @@ func (c *Cluster) tree(sb *strings.Builder, prefix string, skipSingle bool) {
 		return // skip single nodes ...
 	}
 	const inc = "\t"
-	fmt.Fprintf(sb, "%2.6f\t%s%v\n", c.linkd, prefix, c.obj)
+	fmt.Fprintf(sb, "%2.6f\t%d\t%s%v\n", c.linkd, c.level, prefix, c.obj)
 	if c.left != nil {
 		c.left.tree(sb, inc+prefix, skipSingle)
 		c.right.tree(sb, inc+prefix, skipSingle)
@@ -173,6 +180,7 @@ func (c *Cluster) Dendrogram(names []string, minsize int) string {
 		return ""
 	}
 	sb := new(strings.Builder)
+	fmt.Fprintln(sb, "Annotated dendrogramme of clusters :\n(cluster content ....)\t\t( level / link distance )")
 	c.dendrogram(sb, "", names, true, minsize, true)
 	return sb.String()
 }
@@ -192,9 +200,9 @@ func (c *Cluster) dendrogram(sb *strings.Builder, prefix string, names []string,
 		return
 	}
 	if truncate && len(c.obj) > 30 {
-		fmt.Fprintf(sb, "%s+---%v[...]\t(link dist : %2.6f)\n", prefix, c.obj[:28], c.linkd)
+		fmt.Fprintf(sb, "%s+---%v[...]\t(%d / %2.6f)\n", prefix, c.obj[:28], c.level, c.linkd)
 	} else {
-		fmt.Fprintf(sb, "%s+---%v\t(link dist : %2.6f)\n", prefix, c.obj, c.linkd)
+		fmt.Fprintf(sb, "%s+---%v\t(%d / %2.6f)\n", prefix, c.obj, c.level, c.linkd)
 	}
 	if isTail {
 		prefix += "   "
