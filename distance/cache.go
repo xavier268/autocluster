@@ -37,6 +37,7 @@ func NewCache() *Cache {
 	if err := decoder.Decode(&c); err != nil {
 		panic(err)
 	}
+	fmt.Fprintf(os.Stderr, "cache loaded from %s\n", CACHEFILENAME)
 	return c
 }
 

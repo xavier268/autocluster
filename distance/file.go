@@ -49,11 +49,14 @@ func ComputeFolder(folder string) *Matrix {
 // Compute the distance matrix for a group of files.
 // Computations are cached for later reuse
 func ComputeFiles(fnames ...string) *Matrix {
+	cache := NewCache()
+	defer cache.Save()
+
 	fmt.Fprint(os.Stderr, "\nComputing distance matrix")
 	mat := new(Matrix)
 	for i := 0; i < len(fnames); i++ {
 		for j := i + 1; j < len(fnames); j++ {
-			mat.Set(i, j, DistString(fnames[i], fnames[j]))
+			mat.Set(i, j, cache.Get(fnames[i], fnames[j]))
 		}
 		fmt.Fprint(os.Stderr, ".")
 	}
@@ -100,7 +103,7 @@ func ungzip(source []byte) []byte {
 			return zr // unzipped content
 		}
 	}
-	log.Println(err)
+	// log.Println(err)
 	return source
 }
 
@@ -114,14 +117,14 @@ func unzlib(source []byte) []byte {
 			return zr // unzipped content
 		}
 	}
-	log.Println(err)
+	// log.Println(err)
 	return source
 }
 
 func unzip(source []byte) []byte {
 	zr, err := zip.NewReader(bytes.NewReader(source), int64(len(source)))
 	if err != nil { // not a zip archive,
-		log.Println(err)
+		// log.Println(err)
 		return source
 	}
 	// Iterate through the files in the archive
@@ -129,13 +132,13 @@ func unzip(source []byte) []byte {
 	for _, f := range zr.File {
 		rc, err := f.Open()
 		if err != nil {
-			log.Println(err)
+			// log.Println(err)
 			rc.Close()
 			return source
 		}
 		ct, err := io.ReadAll(rc)
 		if err != nil {
-			log.Println(err)
+			// log.Println(err)
 			rc.Close()
 			return source
 		}
@@ -152,7 +155,7 @@ func unhtml(source []byte) []byte {
 
 	doc, err := html.Parse(bytes.NewReader(source))
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return source // not valid html !
 	}
 
@@ -186,7 +189,7 @@ func unxml(source []byte) []byte {
 	doc := new(any)
 	err := xml.Unmarshal(source, doc)
 	if err != nil {
-		log.Println(err)
+		// log.Println(err)
 		return source
 	}
 
@@ -202,7 +205,7 @@ func unxml(source []byte) []byte {
 			return text // all fine !
 		}
 		if err != nil {
-			log.Println(err)
+			// log.Println(err)
 			return source // invalid xml ?
 		}
 		switch v := tok.(type) {
