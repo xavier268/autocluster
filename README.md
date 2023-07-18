@@ -271,7 +271,7 @@ Usage :
 You may want to have a quick look at the paper attached below.
 
 The goal is to construct the distance matrix, by measuring a *distance* from one file to another.
-First, because we care only about content, and not format, we do everything we can to extract text content from the file, to make sure we compare actual content and not format. For instance, in the test folder, you will find a couple of files with almost identical content : a word file, an excel file, and html file, a zipped file, ... A naïve comparison of these files would fail, and they would be put in far away clsuters, because of the significant difference in format. Because we first extract text before computing the distance, the results are much better. You can see in the clustering above that these 4 test files are aggregated totether naturally, showing reasonnably small distance between them - these are files 20 to 23 above.
+First, because we care only about content, and not format, we do everything we can to extract text content from the file, to make sure we compare actual content and not format. For instance, in the test folder, you will find a couple of files with almost identical content : a word file, an excel file, and html file, a zipped file, ... A naïve comparison of these files would fail, and they would be put in far away clsuters, because of the significant difference in format. Because we first extract text before computing the distance, the results are much better. You can see in the clustering above that these 4 test files are aggregated together naturally, showing reasonnably small distance between them - these are files 20 to 23 above.
 
 Okay, we get the content that matters from each file, then what ?
 
