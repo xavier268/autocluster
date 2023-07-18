@@ -63,12 +63,23 @@ func (m *Matrix) String() string {
 	}
 	sb := new(strings.Builder)
 	for j := 0; j < m.size; j++ {
+		if j == 11 {
+			fmt.Fprintf(sb, "\t[...%d]", m.size-1)
+			break
+		}
 		fmt.Fprintf(sb, "\t%8d", j)
 	}
 	for i := 0; i < m.size; i++ {
 		fmt.Fprintf(sb, "\n%5d\t", i)
 		for j := 0; j < m.size; j++ {
+			if j > 10 {
+				break
+			}
 			fmt.Fprintf(sb, "%02.6f\t", m.Dist(i, j))
+		}
+		if i == 10 {
+			fmt.Fprintf(sb, "\n[...%d]", m.size-1)
+			break
 		}
 	}
 	fmt.Fprintln(sb)

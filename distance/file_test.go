@@ -6,14 +6,27 @@ import (
 	"testing"
 )
 
-func TestExtractText(t *testing.T) {
+func TestExtractTextTestFiles(t *testing.T) {
 
-	data := []string{
-		"test.html.zip",
-		"test.html",
-		"test.docx",
-		"test.xlsx",
+	data := FilesInFolder(filepath.Join("..", "testFiles"))
+
+	for i, d := range data {
+
+		dumpFile(i, d)
 	}
+
+	mat := ComputeFiles(data...)
+	fmt.Println("Files processed :")
+	for i, d := range data {
+		fmt.Printf("%2d\t%s\n", i, d)
+	}
+	fmt.Println(mat)
+
+}
+
+func TestExtractProjectFiles(t *testing.T) {
+
+	data := FilesInFolder("..")
 
 	for i, d := range data {
 
@@ -31,7 +44,6 @@ func TestExtractText(t *testing.T) {
 
 func dumpFile(i int, fname string) {
 	fmt.Printf("\n\n%d)\t======= Dumping extracted text content of %s =========\n", i, fname)
-	f := filepath.Join("..", "testFiles", fname)
-	x := ExtractText(f)
+	x := ExtractText(fname)
 	fmt.Println(string(x))
 }

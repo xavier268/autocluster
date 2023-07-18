@@ -9,10 +9,38 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"regexp"
 
 	"golang.org/x/net/html"
 )
+
+// Get (recursiveley) all files in folder
+func FilesInFolder(folder string) []string {
+
+	files := []string{}
+	visit := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Print(err)
+			return nil
+		}
+		if !info.IsDir() {
+			ap, _ := filepath.Abs(path)
+			files = append(files, ap)
+		}
+		return nil
+	}
+	err := filepath.Walk(folder, visit)
+	if err != nil {
+		log.Print(err)
+	}
+	return files
+}
+
+// Compute the distance matrix for all files in a folder
+func ComputeFolder(folder string) *Matrix {
+	return ComputeFiles(FilesInFolder(folder)...)
+}
 
 // Compute the distance matrix for a group of files
 func ComputeFiles(fnames ...string) *Matrix {
