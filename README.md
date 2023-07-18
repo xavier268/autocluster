@@ -296,6 +296,6 @@ And because all computations are cached, it may take some time the first time, b
 * Project is structured in 2 packages :
     * *distance* is only taking care of the computation of distance between single elements. This package does all the file distance processing, text extraction, etc ... A *distance* must simply follow a basic interface, accepting two int ids, and returning a float64.
     * *cluster* does the actual grouping and processing, when passed a *distance*. It defines how a *linkage distance* is used to measure *distance* between *clusters*.
-* not much optimization was done beyond the obvious for performance. Clarity was prefered of perfomance. There might be room to improve here also, but I did not feel the need ...
+* not much optimization was done beyond the obvious for performance. Clarity was prefered over perfomance. There might be room to improve here also, but I did not feel the need ...
 
 See detailled documentation on https://pkg.go.dev/
