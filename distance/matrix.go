@@ -6,13 +6,15 @@ import (
 )
 
 // A distance matrix
-// Optimised for storage efficiency. Zero value can be sused immediately.
+// Optimised for storage efficiency.
+// Zero value can be used immediately.
 type Matrix struct {
 	size int
 	data []float64 // stores the value as (0,1),     (0,2),(1,2),     (0,3),(1,3),(2,3),     (0,4),(1,4), 2,4),(3,4),    ...
 }
 
 // Get distance between i and j.
+// This is the minimum interface required by the cluster package.
 func (m *Matrix) Dist(i, j int) float64 {
 	if i == j {
 		return 0.
@@ -32,8 +34,9 @@ func matindex(i, j int) int {
 	}
 }
 
-// Set a distance between i and j.
-// Size increases as needed.
+// Set a distance for (i,j).
+// It also sets the same value for (j,i).
+// Size will increase as needed.
 func (m *Matrix) Set(i, j int, d float64) {
 	if i == j {
 		return
@@ -56,7 +59,7 @@ func (m *Matrix) Size() int {
 	return m.size
 }
 
-// String for display
+// String to display a readable (possibly truncated) matrix.
 func (m *Matrix) String() string {
 	if m == nil || m.size == 0 {
 		return "<empty matrix>"

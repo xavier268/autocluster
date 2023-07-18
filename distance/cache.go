@@ -10,18 +10,19 @@ import (
 	"path/filepath"
 )
 
-// Default. Can be cahnged before using cache, typically with flags.
+// Default. Can be changed before use, see the CLI flags in main.go.
 var CACHEFILENAME string = filepath.Join(os.TempDir(), "fileDistance.cache")
 
 // Cache for file to file distance.
 // It is a very expensive calculation, since we check for word, excel, zip, etc ... files, so caching makes sense.
 // We do not use filenames, but the hash of both files, to ensure propoer handling of file name or content changes.
 type Cache struct {
-	M map[[sha256.Size * 2]byte]float64
+	M map[[sha256.Size * 2]byte]float64 // should not be used directly, nor relied upon. Public only because required for ease of saving as gob.
 }
 
 // Create a new cache.
-// Load from previously saved cache if available.
+// Load from previously saved cache if there is one.
+// Not thread safe.
 func NewCache() *Cache {
 	c := new(Cache)
 	file, err := os.Open(CACHEFILENAME)
@@ -41,6 +42,8 @@ func NewCache() *Cache {
 	return c
 }
 
+// Save cache to file.
+// Not thread safe.
 func (c *Cache) Save() {
 	file, err := os.Create(CACHEFILENAME)
 	if err != nil {
@@ -57,11 +60,13 @@ func (c *Cache) Save() {
 
 }
 
+// Clear cache in memory.
+// Cache on file will be erased on next save.
 func (c *Cache) Clear() {
 	c.M = make(map[[sha256.Size * 2]byte]float64)
 }
 
-// Try to get from cache, if cache misses, compute and store result.
+// Try to read from cache, if cache misses, compute, store and return result.
 func (c *Cache) Get(f1, f2 string) float64 {
 	idx := cacheindex(f1, f2)
 	v, ok := c.M[idx]
@@ -80,7 +85,8 @@ func (c *Cache) Size() int {
 }
 
 // index ensures that (f1, f2) and (f2,f1) will point to the same value.
-// It also ensures result is the zero-value if f1 and f2 have identical contents.
+// It also ensures result is the zero-value if f1 and f2 have identical contents,
+// even if one is a zipped version of the other.
 func cacheindex(f1 string, f2 string) (idx [sha256.Size * 2]byte) {
 
 	d1, d2 := digest(f1), digest(f2)

@@ -15,6 +15,9 @@ import (
 
 func main() {
 
+	const VERSION = "0.8.3"
+	const COPYRIGHT = "(c) xavier268<at>github.com, 2023"
+
 	var ( // flags
 		FLAGLINK    string // type of linkage
 		FLAGMINSIZE int    // minimum cluster size (for display)
@@ -40,7 +43,7 @@ func main() {
 	args := flag.Args()
 
 	if FLAGHELP {
-		fmt.Printf("Unsupervised clustering of files\n\tdistance version : %s\n\tcluster version  : %s\nUsage :\n", distance.VERSION, cluster.VERSION)
+		fmt.Printf("Unsupervised clustering of files\n%s - v%s\nUsage :\n", COPYRIGHT, VERSION)
 		flag.PrintDefaults()
 		return
 	}

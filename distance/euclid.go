@@ -12,6 +12,8 @@ func dist(v, w Vect) float64 {
 	return math.Sqrt(d)
 }
 
+// Compute euclidian distance matrix for vectors.
+// Used mainly for test purposes.
 func ComputeEuclid(vects []Vect) (mat *Matrix) {
 	mat = new(Matrix)
 	for i := 0; i < len(vects); i++ {

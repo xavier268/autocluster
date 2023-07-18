@@ -6,16 +6,15 @@ import (
 )
 
 // Compute a normalized compression distance between two strings using gzip.
-// Should normally be between 0.0 and 1.0.
-// See article attached, annexe A.
+// Should normally be between 0.0 and 1.0., could sometimes end up slightly above 1.0 ...
+// See article attached, specially annexe A.
 func DistString(xs, ys string) float64 {
-
 	return DistBytes([]byte(xs), []byte(ys))
 }
 
 // Compute a normalized compression distance between two []byte using gzip.
-// Should normally be between 0.0 and 1.0.
-// See article attached, annexe A.
+// Should normally be between 0.0 and 1.0., could sometimes end up slightly above 1.0 ...
+// See article attached, specially annexe A.
 func DistBytes(x, y []byte) float64 {
 
 	if bytes.Equal(x, y) {
@@ -35,7 +34,7 @@ func DistBytes(x, y []byte) float64 {
 	return (ziplen(x, y) - dx) / dy
 }
 
-// implements a file that stores nothing but just count bytes.
+// implements a write only file that stores nothing but just count bytes written to it.
 type counterFile struct {
 	count int
 }
@@ -56,7 +55,7 @@ func ziplen(xx ...[]byte) float64 {
 	for _, x := range xx {
 		w.Write(x)
 	}
-	w.Close() // require to flush data !
+	w.Close() // required to flush data !
 	return float64(c.count)
 }
 
