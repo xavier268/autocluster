@@ -17,18 +17,18 @@ func (m *Matrix) Dist(i, j int) float64 {
 	if i == j {
 		return 0.
 	}
-	idx := index(i, j)
+	idx := matindex(i, j)
 	if idx >= len(m.data) {
 		return 0.
 	}
 	return m.data[idx]
 }
 
-func index(i, j int) int {
+func matindex(i, j int) int {
 	if i < j {
 		return i + j*(j-1)/2
 	} else {
-		return index(j, i)
+		return matindex(j, i)
 	}
 }
 
@@ -38,7 +38,7 @@ func (m *Matrix) Set(i, j int, d float64) {
 	if i == j {
 		return
 	}
-	idx := index(i, j)
+	idx := matindex(i, j)
 	if i >= m.size || j >= m.size || idx >= len(m.data) { // auto extend matrix when needed and adjust size
 		m.data = append(m.data, make([]float64, 1+idx-len(m.data))...)
 		if i > j {
@@ -47,7 +47,7 @@ func (m *Matrix) Set(i, j int, d float64) {
 			m.size = j + 1
 		}
 	}
-	m.data[index(i, j)] = d
+	m.data[matindex(i, j)] = d
 }
 
 // Provide current size n of matrix (n x n)

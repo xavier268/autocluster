@@ -46,7 +46,8 @@ func ComputeFolder(folder string) *Matrix {
 	return ComputeFiles(FilesInFolder(folder)...)
 }
 
-// Compute the distance matrix for a group of files
+// Compute the distance matrix for a group of files.
+// Computations are cached for later reuse
 func ComputeFiles(fnames ...string) *Matrix {
 	fmt.Fprint(os.Stderr, "\nComputing distance matrix")
 	mat := new(Matrix)
