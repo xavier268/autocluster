@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"time"
 
 	"golang.org/x/net/html"
 )
@@ -51,14 +52,19 @@ func ComputeFolder(folder string) *Matrix {
 func ComputeFiles(fnames ...string) *Matrix {
 	cache := NewCache()
 	defer cache.Save()
+	lastSave := time.Now()
 
-	fmt.Fprint(os.Stderr, "\nComputing distance matrix")
+	fmt.Fprintln(os.Stderr)
 	mat := new(Matrix)
 	for i := 0; i < len(fnames); i++ {
 		for j := i + 1; j < len(fnames); j++ {
 			mat.Set(i, j, cache.Get(fnames[i], fnames[j]))
 		}
-		fmt.Fprint(os.Stderr, ".")
+		fmt.Fprintf(os.Stderr, "\rComputing distance matrix : %d/%d           ", i+1, len(fnames))
+		if time.Since(lastSave) > time.Minute { // save cache evry minute
+			cache.Save()
+			lastSave = time.Now()
+		}
 	}
 	return mat
 }

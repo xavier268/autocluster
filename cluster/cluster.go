@@ -70,9 +70,10 @@ func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
 
 // Merge until there is only 1 cluster left.
 func (cc *CContext) MergeAll() {
-	fmt.Fprint(os.Stderr, "\nComputing clusters")
-	for !cc.Merge() {
-		fmt.Fprintf(os.Stderr, ".")
+
+	fmt.Fprint(os.Stderr, "\n")
+	for i := 0; !cc.Merge(); i++ {
+		fmt.Fprintf(os.Stderr, "\rComputing clusters %d/%d        ", i+2, len(cc.cls)-i-1)
 	}
 	fmt.Println()
 }

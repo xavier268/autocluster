@@ -37,7 +37,7 @@ func NewCache() *Cache {
 	if err := decoder.Decode(&c); err != nil {
 		panic(err)
 	}
-	fmt.Fprintf(os.Stderr, "cache loaded from %s\n", CACHEFILENAME)
+	fmt.Fprintf(os.Stderr, "\ncache loaded from %s (%d values) \n", CACHEFILENAME, c.Size())
 	return c
 }
 
@@ -52,6 +52,9 @@ func (c *Cache) Save() {
 	if err := encoder.Encode(c); err != nil {
 		panic(err)
 	}
+
+	fmt.Fprintf(os.Stderr, "\ncache saved to %s ( %d values)\n", CACHEFILENAME, c.Size())
+
 }
 
 func (c *Cache) Clear() {
