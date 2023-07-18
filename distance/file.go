@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-// Get (recursiveley) all files in folder
+// Get (recursiveley) all files in folder, ignoring .git folder
 func FilesInFolder(folder string) []string {
 
 	files := []string{}
@@ -24,7 +24,10 @@ func FilesInFolder(folder string) []string {
 			log.Print(err)
 			return nil
 		}
-		if !info.IsDir() {
+		if info.IsDir() && info.Name() == ".git" {
+			return filepath.SkipDir
+		}
+		if !info.IsDir() && info.Name() != ".gitignore" {
 			ap, _ := filepath.Abs(path)
 			files = append(files, ap)
 		}
