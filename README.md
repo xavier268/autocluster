@@ -1,5 +1,7 @@
 # autocluster
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/xavier268/autocluster.svg)](https://pkg.go.dev/github.com/xavier268/autocluster) [![Go Report Card](https://goreportcard.com/badge/github.com/xavier268/autocluster)](https://goreportcard.com/report/github.com/xavier268/autocluster)
+
 Automatic, hierarchical clustering of any files. Pure go.
 
 ## What is this project for ...
