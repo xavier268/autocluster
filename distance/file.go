@@ -70,7 +70,7 @@ func ComputeFiles(fnames ...string) *Matrix {
 }
 
 // Distance between two files, given by their path names.
-// Usefull text content will be extracted first.
+// Useful text content will be extracted first.
 func DistFile(f1, f2 string) float64 {
 
 	x, y := ExtractText(f1), ExtractText(f2)
