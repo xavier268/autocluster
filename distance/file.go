@@ -1,3 +1,4 @@
+// Package distance provides file content distances and related utilities.
 package distance
 
 import (
