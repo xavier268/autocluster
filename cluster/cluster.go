@@ -1,3 +1,4 @@
+// Package cluster provides clustering in a distance agnostic way 
 package cluster
 
 import (
