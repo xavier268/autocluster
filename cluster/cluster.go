@@ -13,8 +13,8 @@ import (
 
 type Cluster struct {
 	obj     []int    // list of objects (0 based)
-	left    *Cluster // tree of hierarchical clusters
-	right   *Cluster // tree of hierarchical clusters
+	left    *Cluster // left sub-tree of hierarchical clusters
+	right   *Cluster // right sub-tree of hierarchical clusters
 	linkd   float64  // distance between left and right sub clusters
 	level   int      // from the leaf = 0
 	med     int      // medoid for cluster
@@ -23,10 +23,11 @@ type Cluster struct {
 
 // Cluster context
 type CContext struct {
-	ctx context.Context
-	cls []*Cluster // a slice of free clusters - never empty !
-	ld  LinkDist   // Link distance to use
-	ed  Dist       // Element distance
+	ctx   context.Context
+	cls   []*Cluster // a slice of free clusters - always at least one !
+	ld    LinkDist   // Link distance to use
+	ed    Dist       // Element distance
+	Names []string   // Name associated with each object
 }
 
 func NewEmptyCContext(ctx context.Context) *CContext {
@@ -41,12 +42,17 @@ func NewEmptyCContext(ctx context.Context) *CContext {
 // Defines how to converts the element distance into a linkage distance.
 type LinkOption func(Dist) LinkDist
 
-func NewCContexMatrix(ctx context.Context, mat *distance.Matrix, linkOption LinkOption) *CContext {
+func NewCContexMatrix(ctx context.Context, mat *distance.Matrix, linkOption LinkOption, names []string) *CContext {
 	cc := NewEmptyCContext(ctx)
 	cc.ld = linkOption(mat.Dist)
 	cc.ed = mat.Dist
 	for i := 0; i < mat.Size(); i++ {
 		cc.AddObject(i)
+	}
+	if len(names) == mat.Size() {
+		cc.Names = names
+	} else {
+		cc.Names = make([]string, mat.Size())
 	}
 	return cc
 }
@@ -61,7 +67,7 @@ func (cc *CContext) AddObject(obj int) {
 	cc.cls = append(cc.cls, c)
 }
 
-// Merge 2 clusters. Old clusters become inactive, new cluster is now active.
+// Merge 2 clusters. Old clusters removed from free cluster list, new cluster added.
 func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
 	c := &Cluster{
 		obj:   append(c1.obj, c2.obj...),
