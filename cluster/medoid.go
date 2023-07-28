@@ -5,7 +5,7 @@ import (
 )
 
 // Find the Medoïd and the average distance from the cluster elements to the medoid (including the medoid itself).
-func (cc *CContext) Medoid(c *Cluster) (med int, dist float64) {
+func (cc *CContext) medoid(c *Cluster) (med int, dist float64) {
 
 	if c == nil || len(c.obj) == 0 {
 		panic("cannot find medoid of an empty cluster)")

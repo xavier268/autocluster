@@ -68,11 +68,11 @@ func main() {
 	defer cancel()
 	switch strings.ToLower(FLAGLINK) {
 	case "single":
-		cc = cluster.NewCContexMatrix(ctx, mat, cluster.SingleLinkage, files)
+		cc = cluster.NewCContex(ctx, mat, cluster.SingleLinkage, files)
 	case "complete":
-		cc = cluster.NewCContexMatrix(ctx, mat, cluster.CompleteLinkage, files)
+		cc = cluster.NewCContex(ctx, mat, cluster.CompleteLinkage, files)
 	case "upgma":
-		cc = cluster.NewCContexMatrix(ctx, mat, cluster.UPGMALinkage, files)
+		cc = cluster.NewCContex(ctx, mat, cluster.UPGMALinkage, files)
 	default:
 		fmt.Fprintln(os.Stderr, "you selected an invalid linkage option")
 		flag.PrintDefaults()

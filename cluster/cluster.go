@@ -27,10 +27,10 @@ type CContext struct {
 	cls   []*Cluster // a slice of free clusters - always at least one !
 	ld    LinkDist   // Link distance to use
 	ed    Dist       // Element distance
-	Names []string   // Name associated with each object
+	names []string   // Name associated with each object
 }
 
-func NewEmptyCContext(ctx context.Context) *CContext {
+func newEmptyCContext(ctx context.Context) *CContext {
 	return &CContext{
 		ctx: ctx,
 		cls: []*Cluster{},
@@ -42,23 +42,25 @@ func NewEmptyCContext(ctx context.Context) *CContext {
 // Defines how to converts the element distance into a linkage distance.
 type LinkOption func(Dist) LinkDist
 
-func NewCContexMatrix(ctx context.Context, mat *distance.Matrix, linkOption LinkOption, names []string) *CContext {
-	cc := NewEmptyCContext(ctx)
+// Creates a new cluster context with a linkage distance,
+// based upon a distance matrix and a list of names for each object.
+func NewCContex(ctx context.Context, mat *distance.Matrix, linkOption LinkOption, names []string) *CContext {
+	cc := newEmptyCContext(ctx)
 	cc.ld = linkOption(mat.Dist)
 	cc.ed = mat.Dist
 	for i := 0; i < mat.Size(); i++ {
-		cc.AddObject(i)
+		cc.addObject(i)
 	}
 	if len(names) == mat.Size() {
-		cc.Names = names
+		cc.names = names
 	} else {
-		cc.Names = make([]string, mat.Size())
+		cc.names = make([]string, mat.Size())
 	}
 	return cc
 }
 
 // Add a new single object cluster
-func (cc *CContext) AddObject(obj int) {
+func (cc *CContext) addObject(obj int) {
 	c := &Cluster{
 		obj:     []int{obj},
 		med:     obj,
@@ -75,7 +77,7 @@ func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
 		right: c2,
 		linkd: d,
 	}
-	c.med, c.meddist = cc.Medoid(c)
+	c.med, c.meddist = cc.medoid(c)
 	if c1.level > c2.level {
 		c.level = c1.level + 1
 	} else {
@@ -207,14 +209,3 @@ func (c *Cluster) dendrogram(sb *strings.Builder, prefix string, names []string,
 	c.right.dendrogram(sb, prefix, names, true, minsize, truncate)
 	fmt.Fprintln(sb, prefix)
 }
-
-func isIn(v int, sl []int) bool {
-	for _, s := range sl {
-		if v == s {
-			return true
-		}
-	}
-	return false
-}
-
-var _ = isIn
