@@ -78,7 +78,7 @@ func main() {
 		flag.PrintDefaults()
 		return
 	}
-	cc.MergeAll()
+	cc.Merge()
 	root := cc.Root()
 	if FLAGDEND {
 		fmt.Println()

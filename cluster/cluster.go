@@ -70,7 +70,7 @@ func (cc *CContext) addObject(obj int) {
 }
 
 // Merge 2 clusters. Old clusters removed from free cluster list, new cluster added.
-func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
+func (cc *CContext) merge2clusters(c1, c2 *Cluster, d float64) {
 	c := &Cluster{
 		obj:   append(c1.obj, c2.obj...),
 		left:  c1,
@@ -106,10 +106,10 @@ func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
 }
 
 // Merge until there is only 1 cluster left.
-func (cc *CContext) MergeAll() {
+func (cc *CContext) Merge() {
 
 	fmt.Fprint(os.Stderr, "\n")
-	for i := 0; !cc.Merge(); i++ {
+	for i := 0; !cc.mergeStep(); i++ {
 		fmt.Fprintf(os.Stderr, "\rComputing clusters %d/%d        ", i+2, len(cc.cls)-i-1)
 	}
 	fmt.Println()
@@ -121,7 +121,7 @@ func (cc *CContext) Root() *Cluster {
 }
 
 // Make a single merge step. Return true when finished (only 1 cluster left)
-func (cc *CContext) Merge() (finished bool) {
+func (cc *CContext) mergeStep() (finished bool) {
 
 	if len(cc.cls) <= 1 {
 		return true // done !
@@ -141,7 +141,7 @@ func (cc *CContext) Merge() (finished bool) {
 	if c1 == nil {
 		panic("internal error - merge should have happened")
 	}
-	cc.merge(c1, c2, dmin)
+	cc.merge2clusters(c1, c2, dmin)
 	return false
 }
 
