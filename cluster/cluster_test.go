@@ -38,29 +38,19 @@ func TestStringCluster(t *testing.T) {
 	cc.MergeAll()
 	k = cc.Root()
 	fmt.Println(k.Tree())
-	displayMedoids(cc)
 
 	fmt.Println("Computing clusters - complete linkage")
 	cc = NewCContexMatrix(context.Background(), mat, CompleteLinkage)
 	cc.MergeAll()
 	k = cc.Root()
 	fmt.Println(k.Tree())
-	displayMedoids(cc)
 
 	fmt.Println("Computing clusters - UPGMA linkage")
 	cc = NewCContexMatrix(context.Background(), mat, UPGMALinkage)
 	cc.MergeAll()
 	k = cc.Root()
 	fmt.Println(k.Tree())
-	displayMedoids(cc)
 
-}
-
-func displayMedoids(cc *CContext) {
-	for k := range cc.cls {
-		m, d := cc.Medoid(k)
-		fmt.Printf("Object %d (avg dist %2.6f) is medoïd for cluster %v (link dist %2.6f)  \n", m, d, k.obj, k.linkd)
-	}
 }
 
 func displayData() {

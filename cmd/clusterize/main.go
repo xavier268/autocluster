@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -15,7 +14,7 @@ import (
 
 func main() {
 
-	const VERSION = "0.8.3"
+	const VERSION = "0.8.5"
 	const COPYRIGHT = "(c) xavier268<at>github.com, 2023"
 
 	var ( // flags
@@ -31,19 +30,20 @@ func main() {
 
 	flag.StringVar(&FLAGLINK, "link", "complete", "select type of linkage from single, complete, upgma")
 	flag.IntVar(&FLAGMINSIZE, "min", 0, "set this value to a high number to get less clusters")
-	flag.StringVar(&distance.CACHEFILENAME, "cache", filepath.Join(os.TempDir(), "fileDistance.cache"), "cache file location")
+	// flag.StringVar(&distance.CACHEFILENAME, "cache", distance.CACHEFILENAME, "cache file location")
 	flag.BoolVar(&FLAGHELP, "h", false, "print version, usage and exit")
 	flag.BoolVar(&FLAGDEND, "d", true, "print dendrogramme view")
 	flag.BoolVar(&FLAGTREE, "t", true, "print tree view")
 	flag.BoolVar(&FLAGNAMES, "f", true, "list file names")
 	flag.BoolVar(&FLAGMATRIX, "dm", true, "print distance matrix")
-	flag.BoolVar(&cluster.FLAGMEDOID, "med", true, "compute and print medoïd view")
+	// flag.BoolVar(&cluster.FLAGMEDOID, "med", true, "compute and print medoïd view") // always do it !
 
 	flag.Parse()
 	args := flag.Args()
 
 	if FLAGHELP {
 		fmt.Printf("Unsupervised clustering of files\n%s - v%s\nUsage :\n", COPYRIGHT, VERSION)
+		fmt.Printf("Using cache file : %s\n", distance.CACHEFILENAME)
 		flag.PrintDefaults()
 		return
 	}
@@ -87,11 +87,6 @@ func main() {
 	if FLAGTREE {
 		fmt.Println()
 		fmt.Println(root.Tree())
-	}
-
-	if cluster.FLAGMEDOID {
-		fmt.Println()
-		cc.DumpMedoids()
 	}
 
 }

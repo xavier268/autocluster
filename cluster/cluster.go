@@ -1,4 +1,4 @@
-// Package cluster provides clustering in a distance agnostic way 
+// Package cluster provides clustering in a distance agnostic way
 package cluster
 
 import (
@@ -12,29 +12,27 @@ import (
 )
 
 type Cluster struct {
-	obj   []int    // list of objects (0 based)
-	left  *Cluster // tree of hierarchical clusters
-	right *Cluster // tree of hierarchical clusters
-	linkd float64  // distance between left and right sub clusters
-	level int      // from the leaf = 0
+	obj     []int    // list of objects (0 based)
+	left    *Cluster // tree of hierarchical clusters
+	right   *Cluster // tree of hierarchical clusters
+	linkd   float64  // distance between left and right sub clusters
+	level   int      // from the leaf = 0
+	med     int      // medoid for cluster
+	meddist float64  // average medoid distance
 }
 
 // Cluster context
 type CContext struct {
-	ctx     context.Context
-	cls     map[*Cluster]bool     // Set of free clusters, ie clusters that can be merged further
-	ld      LinkDist              // Link distance to use
-	ed      Dist                  // Element distance
-	medoids map[*Cluster]struct { // medoid and distance - may stay unitiallized
-		m int
-		d float64
-	}
+	ctx context.Context
+	cls []*Cluster // a slice of free clusters - never empty !
+	ld  LinkDist   // Link distance to use
+	ed  Dist       // Element distance
 }
 
 func NewEmptyCContext(ctx context.Context) *CContext {
 	return &CContext{
 		ctx: ctx,
-		cls: make(map[*Cluster]bool),
+		cls: []*Cluster{},
 		ld:  nil,
 		ed:  nil,
 	}
@@ -47,10 +45,6 @@ func NewCContexMatrix(ctx context.Context, mat *distance.Matrix, linkOption Link
 	cc := NewEmptyCContext(ctx)
 	cc.ld = linkOption(mat.Dist)
 	cc.ed = mat.Dist
-	cc.medoids = make(map[*Cluster]struct {
-		m int
-		d float64
-	})
 	for i := 0; i < mat.Size(); i++ {
 		cc.AddObject(i)
 	}
@@ -60,13 +54,11 @@ func NewCContexMatrix(ctx context.Context, mat *distance.Matrix, linkOption Link
 // Add a new single object cluster
 func (cc *CContext) AddObject(obj int) {
 	c := &Cluster{
-		obj: []int{obj},
+		obj:     []int{obj},
+		med:     obj,
+		meddist: 0,
 	}
-	cc.cls[c] = true
-	cc.medoids[c] = struct {
-		m int
-		d float64
-	}{obj, 0.}
+	cc.cls = append(cc.cls, c)
 }
 
 // Merge 2 clusters. Old clusters become inactive, new cluster is now active.
@@ -77,20 +69,31 @@ func (cc *CContext) merge(c1, c2 *Cluster, d float64) {
 		right: c2,
 		linkd: d,
 	}
+	c.med, c.meddist = cc.Medoid(c)
 	if c1.level > c2.level {
 		c.level = c1.level + 1
 	} else {
 		c.level = c2.level + 1
 	}
-	cc.cls[c1] = false
-	cc.cls[c2] = false
-	cc.cls[c] = true
-	if FLAGMEDOID {
-		m, d := cc.Medoid(c)
-		cc.medoids[c] = struct {
-			m int
-			d float64
-		}{m, d}
+	// replace c1 by c
+	for i, v := range cc.cls {
+		if v == c1 {
+			cc.cls[i] = c
+			break
+		}
+
+	}
+	// remove c2
+	for i, v := range cc.cls {
+		if v == c2 {
+			if i+1 < len(cc.cls) {
+				cc.cls = append(cc.cls[:i], cc.cls[i+1:]...)
+				break
+			} else {
+				cc.cls = cc.cls[:i]
+				break
+			}
+		}
 	}
 }
 
@@ -106,34 +109,23 @@ func (cc *CContext) MergeAll() {
 
 // Get the root cluster
 func (cc *CContext) Root() *Cluster {
-	for k, v := range cc.cls {
-		if v {
-			return k
-		}
-	}
-	return nil
+	return cc.cls[0]
 }
 
 // Make a single merge step. Return true when finished (only 1 cluster left)
 func (cc *CContext) Merge() (finished bool) {
 
-	var free []*Cluster // collect free clusters that could be merged
-	for k, v := range cc.cls {
-		if v {
-			free = append(free, k)
-		}
-	}
-	if len(free) <= 1 {
-		return true
+	if len(cc.cls) <= 1 {
+		return true // done !
 	}
 	var dmin float64 = math.Inf(+1)
 	var c1, c2 *Cluster = nil, nil
-	// Only compare 0 <= i < j < len(free)
-	for i := 0; i < len(free)-1; i++ {
-		for j := i + 1; j < len(free); j++ {
-			d := cc.ld(free[i], free[j])
+	// Only compare 0 <= i < j < len(cc.cls)
+	for i := 0; i < len(cc.cls)-1; i++ {
+		for j := i + 1; j < len(cc.cls); j++ {
+			d := cc.ld(cc.cls[i], cc.cls[j])
 			if c1 == nil || d < dmin {
-				c1, c2 = free[i], free[j]
+				c1, c2 = cc.cls[i], cc.cls[j]
 				dmin = d
 			}
 		}
@@ -148,12 +140,6 @@ func (cc *CContext) Merge() (finished bool) {
 // String representation of a single cluster, for debugging.
 func (c *Cluster) String() string {
 	return fmt.Sprintf("%p\t%v\t%p , %p\t d=%2.6f", c, c.obj, c.left, c.right, c.linkd)
-}
-
-func (cc *CContext) Dump() {
-	for k, v := range cc.cls {
-		fmt.Printf("%v:%p\t%s\n", v, k, k)
-	}
 }
 
 // Tree representation of a group of clusters
