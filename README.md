@@ -18,8 +18,13 @@ Let's see how the current github project folder would do ...
 > go run ./... .
 
 ```
+## TO DO
 
-Update in progress  **to do**
+* continue cleaning output format
+* use aws textract to extract text from pdf (cache extracted text of s3, with addressing based on raw file content)
+* generalized s3 caching for raw files, content addressing naming, include various intermediary steps for zipped files, 
+* parallel content extraction on multiple goroutine,
+* use context to implement timeout and clean exit
 
 ## It's all about distance ...
 
