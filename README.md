@@ -21,6 +21,7 @@ Let's see how the current github project folder would do ...
 ## TO DO
 
 * continue cleaning output format
+* revisit/reduce  cli options
 * use aws textract to extract text from pdf (cache extracted text of s3, with addressing based on raw file content)
 * generalized s3 caching for raw files, content addressing naming, include various intermediary steps for zipped files, 
 * parallel content extraction on multiple goroutine,
