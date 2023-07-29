@@ -63,7 +63,7 @@ func ComputeFiles(fnames ...string) *Matrix {
 		for j := i + 1; j < len(fnames); j++ {
 			mat.Set(i, j, cache.Get(fnames[i], fnames[j]))
 		}
-		fmt.Fprintf(os.Stderr, "\rComputing distance matrix : %d/%d           ", i+1, len(fnames))
+		fmt.Fprintf(os.Stderr, "\rComputing distance matrix : %d/%d           ", i+1, mat.Size())
 		if time.Since(lastSave) > time.Minute { // save cache every minute
 			cache.Save()
 			lastSave = time.Now()

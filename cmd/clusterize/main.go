@@ -80,13 +80,20 @@ func main() {
 	}
 	cc.Merge()
 	root := cc.Root()
-	if FLAGDEND {
+	/*if FLAGDEND {
 		fmt.Println()
 		fmt.Println(root.Dendrogram(files, FLAGMINSIZE))
 	}
+	*/
 	if FLAGTREE {
 		fmt.Println()
-		fmt.Println(root.Tree())
+		fmt.Println(root.ViewAsTree())
 	}
+	list := cc.ListClusters()
+	meds := cc.ListMedoids()
+	//fmt.Println(list)
+	fmt.Println(cc.ViewByLinkDistance(list))
+	fmt.Println(cc.ViewByMedoidDistance(list))
+	fmt.Println(cc.ViewMedoids(meds))
 
 }

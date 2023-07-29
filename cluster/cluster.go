@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"strings"
+	"sort"
 
 	"github.com/xavier268/autocluster/distance"
 )
@@ -77,6 +77,7 @@ func (cc *CContext) merge2clusters(c1, c2 *Cluster, d float64) {
 		right: c2,
 		linkd: d,
 	}
+	sort.Ints(c.obj)
 	c.med, c.meddist = cc.medoid(c)
 	if c1.level > c2.level {
 		c.level = c1.level + 1
@@ -107,10 +108,10 @@ func (cc *CContext) merge2clusters(c1, c2 *Cluster, d float64) {
 
 // Merge until there is only 1 cluster left.
 func (cc *CContext) Merge() {
-
+	nb := len(cc.cls) // initial length will change !
 	fmt.Fprint(os.Stderr, "\n")
 	for i := 0; !cc.mergeStep(); i++ {
-		fmt.Fprintf(os.Stderr, "\rComputing clusters %d/%d        ", i+2, len(cc.cls)-i-1)
+		fmt.Fprintf(os.Stderr, "\rComputing clusters %d/%d        ", i+2, nb)
 	}
 	fmt.Println()
 }
@@ -143,69 +144,4 @@ func (cc *CContext) mergeStep() (finished bool) {
 	}
 	cc.merge2clusters(c1, c2, dmin)
 	return false
-}
-
-// String representation of a single cluster, for debugging.
-func (c *Cluster) String() string {
-	return fmt.Sprintf("%p\t%v\t%p , %p\t d=%2.6f", c, c.obj, c.left, c.right, c.linkd)
-}
-
-// Tree representation of a group of clusters
-func (c *Cluster) Tree() string {
-	sb := new(strings.Builder)
-	fmt.Fprintln(sb, "Table of all clusters :\n\nlink dist.\tlevel\tcluster content .....................")
-	c.tree(sb, "", false) // do not skip single nodes
-	return sb.String()
-}
-
-func (c *Cluster) tree(sb *strings.Builder, prefix string, skipSingle bool) {
-	if skipSingle && len(c.obj) <= 1 {
-		return // skip single nodes ...
-	}
-	const inc = "\t"
-	fmt.Fprintf(sb, "%2.6f\t%d\t%s%v\n", c.linkd, c.level, prefix, c.obj)
-	if c.left != nil {
-		c.left.tree(sb, inc+prefix, skipSingle)
-		c.right.tree(sb, inc+prefix, skipSingle)
-	}
-}
-
-func (c *Cluster) Dendrogram(names []string, minsize int) string {
-	if c == nil {
-		return ""
-	}
-	sb := new(strings.Builder)
-	fmt.Fprintln(sb, "Annotated dendrogramme of clusters :\n(cluster content ....)\t\t( level / link distance )")
-	c.dendrogram(sb, "", names, true, minsize, true)
-	return sb.String()
-}
-
-func (c *Cluster) dendrogram(sb *strings.Builder, prefix string, names []string, isTail bool, minsize int, truncate bool) {
-	if c == nil {
-		return
-	}
-	if len(c.obj) == 0 {
-		panic("internal error - dentogram with empty cluster")
-	}
-	if len(c.obj) == 1 || len(c.obj) < minsize {
-		for _, obj := range c.obj {
-			pp := fmt.Sprintf("%s+---[%d]%s", prefix, obj, strings.Repeat(" - ", 80))
-			fmt.Fprintf(sb, "%s  %s\n", pp[:100], names[obj])
-		}
-		return
-	}
-	if truncate && len(c.obj) > 30 {
-		fmt.Fprintf(sb, "%s+---%v[...]\t(%d / %2.6f)\n", prefix, c.obj[:28], c.level, c.linkd)
-	} else {
-		fmt.Fprintf(sb, "%s+---%v\t(%d / %2.6f)\n", prefix, c.obj, c.level, c.linkd)
-	}
-	if isTail {
-		prefix += "   "
-	} else {
-		prefix += "|  "
-	}
-	//fmt.Fprintln(sb, prefix)
-	c.left.dendrogram(sb, prefix, names, false, minsize, truncate)
-	c.right.dendrogram(sb, prefix, names, true, minsize, truncate)
-	fmt.Fprintln(sb, prefix)
 }
