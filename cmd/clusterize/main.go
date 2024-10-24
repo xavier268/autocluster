@@ -14,8 +14,8 @@ import (
 
 func main() {
 
-	const VERSION = "0.8.5"
-	const COPYRIGHT = "(c) xavier268<at>github.com, 2023"
+	const VERSION = "0.8.6"
+	const COPYRIGHT = "(c) xavier268<at>github.com, 2023,2024"
 
 	var ( // flags
 		FLAGLINK    string // type of linkage
